@@ -9,7 +9,7 @@ Author URI: http://web-artcraft.com
  */
 
  /*
-	test
+dima
  */
  
 define('ADD_USER_DIR', plugin_dir_path(__FILE__));
