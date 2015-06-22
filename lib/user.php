@@ -7,6 +7,10 @@ class user {
         $data['user_email'] = $arr['user_email'];
         $data['first_name'] = $arr['user_name'];
 
+        if($arr['role'] == 'manager'){
+            $data['role'] = $arr['role'];
+        }
+
         return wp_insert_user( $data );
     }
 

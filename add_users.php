@@ -39,9 +39,29 @@ add_action( 'admin_enqueue_scripts', 'true_add_user_backend' );
 add_action( 'wp_enqueue_scripts', 'add_user_style' );
 add_action( 'wp_enqueue_scripts', 'add_user_script' );
 
+
 function add_user_menu_page(){
-    add_menu_page( 'ADD USER', 'Добавить пользователя', 'administrator', 'add_user', 'add_user_admin_page' );
+        add_menu_page( 'ADD USER', 'Добавить пользователя', 'edit_others_posts', 'add_user', 'add_user_admin_page' );
+ }
+
+// Изменим права
+function my_page_capability( $capability ) {
+    return 'edit_others_posts';
 }
+add_filter( 'option_page_capability_add_user', 'my_page_capability' );
+
+
+
+
+function add_theme_caps() {
+    // получим роль author. Одновременно подключимся к классу WP_Role
+    $role = get_role( 'manager' );
+
+    // добавим новую возможность
+    $role->add_cap( 'add_user' );
+}
+add_action( 'admin_init', 'add_theme_caps');
+
 
 add_action('admin_menu', 'add_user_menu_page');
 
@@ -49,10 +69,15 @@ function add_user_admin_page(){
 
     $parser = new Parser_add_user();
     $user = new user();
+    $admin_id = get_current_user_id();
+    $user_info = get_userdata( $admin_id );
+    $role = $user_info->roles[0];
 
     if(isset($_GET['action'])){
         if($_GET['action']=='add_form'){
-            $parser->parse(ADD_USER_DIR."/view/add_worm.php",array(), true);
+            if ($role=='manager'){$vrole=$parser->parse(ADD_USER_DIR."/view/select_manager.php",array(), false);}
+            if ($role=='administrator'){$vrole = $parser->parse(ADD_USER_DIR."/view/select_admin.php",array(), false);}
+            $parser->parse(ADD_USER_DIR."/view/add_worm.php",array('role'=>$vrole), true);
         }
         if($_GET['action']=='del'){
             $del = wp_delete_user($_GET['id']);
@@ -129,3 +154,57 @@ function print_see($id){
     $result = array_merge($user_info, $user_meta_info);
     $parser->parse(ADD_USER_DIR."/view/see.php",$result, true);
 }
+
+
+function user_pages(){
+    $user_id = get_current_user_id();
+    if($user_id=='0') {
+        wp_login_form();
+    }
+    else{
+
+
+        $parser = new Parser_add_user();
+        $user = new user();
+
+        $info = get_userdata($user_id);
+        $info = (array)$info->data;
+        $info2 = $user->get_all_user_meta($user_id);
+        $result = array_merge($info, $info2);
+        $parser->parse(ADD_USER_DIR . "/view/site/user_pages.php", $result, true);
+        if( isset( $_GET['logout'] ) )
+            wp_logout();
+    }
+}
+
+add_shortcode('up', 'user_pages');
+
+
+
+/*-------------------Добавление роли-----------------------------------------------------------*/
+remove_role('manager');
+$result = add_role( 'manager',
+
+        'Менеджер',
+
+    array(
+
+        'read' => true, // true allows this capability
+        'edit_posts' => true, // Allows user to edit their own posts
+        'edit_pages' => true, // Allows user to edit pages
+        'edit_others_posts' => true, // Allows user to edit others posts not just their own
+        'create_posts' => true, // Allows user to create new posts
+        'manage_categories' => true, // Allows user to manage post categories
+        'publish_posts' => true, // Allows the user to publish, otherwise posts stays in draft mode
+        'edit_themes' => false, // false denies this capability. User can’t edit your theme
+        'install_plugins' => false, // User cant add new plugins
+        'update_plugin' => false, // User can’t update any plugins
+        'update_core' => false, // user cant perform core updates
+        'add_user' => true // user cant perform core updates
+
+
+    )
+
+);
+
+/*-------------------Конец добавления роли-----------------------------------------------------*/

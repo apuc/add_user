@@ -12,7 +12,8 @@
         <p>Введите номер договора <input type="text" name="nomdogovor" id=""/></p>
         <p>Введите дату заключения дговора <input type="text" name="date_dog" id=""/></p>
         <p>Введите адрес объекта <input type="text" name="adres" id=""/></p>
-        
+        {role}
+
         <!--<p>Введите логин<input type = "text" name="login"/> </p>
         <p>Введите пароль<input type = "password" name = "pass"/></p>
         <p>Введите название компании <input type="text" name="name_komp" /></p>
