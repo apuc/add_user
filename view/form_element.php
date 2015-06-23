@@ -1,0 +1,1 @@
+<p>{label} <input type="text" name="{key}" id=""/></p>

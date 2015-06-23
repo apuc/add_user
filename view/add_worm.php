@@ -1,6 +1,6 @@
 
     <form action="/wp-admin/admin.php?page=add_user" method="POST">
-        <p>Введите имя <input type="text" name="user_name" id=""/></p>
+        <!--<p>Введите имя <input type="text" name="user_name" id=""/></p>
         <p>Введите логин <input type="text" name="user_login" id=""/></p>
         <p>Введите пароль <input type="text" name="user_pass" id=""/></p>
         <p>Введите Email <input type="text" name="user_email" id=""/></p>
@@ -11,7 +11,8 @@
         <p>Введите лицевой счет в руб <input type="text" name="lic" id=""/></p>
         <p>Введите номер договора <input type="text" name="nomdogovor" id=""/></p>
         <p>Введите дату заключения дговора <input type="text" name="date_dog" id=""/></p>
-        <p>Введите адрес объекта <input type="text" name="adres" id=""/></p>
+        <p>Введите адрес объекта <input type="text" name="adres" id=""/></p>-->
+        {fields}
         {role}
 
         <!--<p>Введите логин<input type = "text" name="login"/> </p>
