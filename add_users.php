@@ -104,20 +104,18 @@ function add_user_admin_page(){
             else{
                 $edit['ref'] = "";
             }
-            //prn($result);
+
             $f = $user->see_pole();
-            //prn($user->get_array_key());
-            foreach($result as $k => $v){
-                if($k != 'user_login' && $k != 'user_pass'){
-                    if (in_array($k,$user->get_array_key())){
-                        $data['value'] = $v;
-                        $data['key'] = $k;
-                        $data['label'] = $user->get_label_by_key($k);
-                        $fields .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",$data, false);
-                    }
+            $edit['fields'] =  $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => 'Email', 'key' => 'user_email', 'value' => $result['user_email']), false);
+            $edit['fields'] .=  $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => 'Имя', 'key' => 'first_name', 'value' => $result['first_name']), false);
+            foreach ($f as $v){
+                if($v->key != 'user_login' && $v->key != 'user_pass' && $v->key != 'user_email' && $v->key != 'first_name'){
+                    $edit['fields'] .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => $v->label, 'key' => $v->key, 'value' => $result[$v->key]), false);
                 }
             }
-            $edit['fields'] = $fields;
+
+
+
             $edit['ID'] = $result['ID'];
            $parser->parse(ADD_USER_DIR."/view/edit_form.php",$edit, true);
         }
@@ -207,7 +205,9 @@ function print_see($id){
                 $data['label'] = $user->get_label_by_key($k);
                 $fields .= $parser->parse(ADD_USER_DIR."/view/see_element_user.php",$data, false);
             }*/
-            $fields .= $parser->parse(ADD_USER_DIR."/view/see_element_user.php",array('label' => $v->label,'value' => $result[$v->key]), false);
+            if (!empty($result[$v->key])){
+                $fields .= $parser->parse(ADD_USER_DIR."/view/see_element_user.php",array('label' => $v->label,'value' => $result[$v->key]), false);
+            }
         }
     }
     $edit['fields'] = $fields;
@@ -241,17 +241,36 @@ function user_pages(){
     }
     else{
 
-
         $parser = new Parser_add_user();
         $user = new user();
-
         $info = get_userdata($user_id);
         $info = (array)$info->data;
         $info2 = $user->get_all_user_meta($user_id);
         $result = array_merge($info, $info2);
-        $parser->parse(ADD_USER_DIR . "/view/site/user_pages.php", $result, true);
-        if( isset( $_GET['logout'] ) )
-            wp_logout();
+        $f = $user->see_pole();
+        $fields = "";
+        foreach($f as  $v) {
+            if(($v->key != 'user_login') && ($v->key != 'user_pass')){
+                if (!empty($result[$v->key])) {
+                    $fields .= $parser->parse(ADD_USER_DIR . "/view/site/user_info_pages.php", array('label' => $v->label, 'value' => $result[$v->key]), false);
+                }
+            }
+        }
+        $edit['fields'] = $fields;
+
+        global $user;
+      //  prn($k = current_user_can('manager'));
+
+        if( current_user_can('manager') ){
+            $edit['url'] = home_url('/wp-admin/');
+            $parser->parse(ADD_USER_DIR . "/view/site/user_manager.php", $edit, fulse);
+        }
+        else{
+            $parser->parse(ADD_USER_DIR . "/view/site/user_pages.php", $edit, true);
+        }
+
+
+
     }
 }
 
