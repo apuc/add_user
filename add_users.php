@@ -117,7 +117,7 @@ function add_user_admin_page(){
                 }
                /* if ($v->key = 'user_pass'){$edit['fields'] .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => $v->label, 'key' => $v->key, 'value' => ''), false);}*/
             }
-
+/*------------------*/
 
 
             $edit['ID'] = $result['ID'];
