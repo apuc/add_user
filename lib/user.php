@@ -51,6 +51,11 @@ class user {
         $data['ID'] = $arr['update'];
         $data['user_email'] = $arr['user_email'];
         $data['first_name'] = $arr['first_name'];
+
+        if (!empty($arr['user_pass'])){
+            wp_set_password( $arr['user_pass'], $data['ID'] );
+        }
+
         $k=wp_update_user($data);
     }
 
