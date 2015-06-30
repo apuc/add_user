@@ -2,5 +2,6 @@
     <p>Введите название поля на русском языке <input type="text" name="label" id=""/></p>
     <p>Введите название поля латиницей без спецсимволов <input type="text" name="key" id=""/></p>
     <p>Введите приоритет поля <input type="number" name="priority" id=""/></p>
+    <p>Опубликовать<input type="checkbox" name="publ" value="1" /></p>
     <input type="submit" value = "Добавить"/>
 </form>

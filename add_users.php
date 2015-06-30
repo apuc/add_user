@@ -17,6 +17,7 @@ define('ADD_USER_URL', plugin_dir_url(__FILE__));
 
 require_once(ADD_USER_DIR."/lib/parser_add_user.php");
 require_once(ADD_USER_DIR."/lib/user.php");
+require_once(ADD_USER_DIR."functions.php");
 
 function add_user_style(){
     wp_enqueue_style( 'main-style', ADD_USER_URL . 'css/style.css', array(), '1');
@@ -72,7 +73,7 @@ function add_user_admin_page(){
     $admin_id = get_current_user_id();
     $user_info = get_userdata( $admin_id );
     $role = $user_info->roles[0];
-    theme_url();
+   /* theme_url();*/
     if(isset($_GET['action'])){
         if($_GET['action']=='add_pole'){
             $parser->parse(ADD_USER_DIR."/view/add_pole.php",array(), true);
@@ -117,8 +118,6 @@ function add_user_admin_page(){
                 }
                /* if ($v->key = 'user_pass'){$edit['fields'] .= $parser->parse(ADD_USER_DIR."/view/edit_form_element.php",array('label' => $v->label, 'key' => $v->key, 'value' => ''), false);}*/
             }
-/*------------------*/
-
 
             $edit['ID'] = $result['ID'];
            $parser->parse(ADD_USER_DIR."/view/edit_form.php",$edit, true);
@@ -158,19 +157,45 @@ function add_user_admin_page(){
             $user_id = $user->add_pole($_POST);
         }
 
-        print_main();
+        if (isset($_POST['search'])){
+
+            //$parser->parse(ADD_USER_DIR . "/view/result_searh.php", array(), true);
+            print_result_search();
+            exit;
+        }
+
+        echo print_main();
     }
 
 }
 
 function print_main(){
     $parser = new Parser_add_user();
-    $parser->parse(ADD_USER_DIR."/view/users.php",array(), true);
-    $users = get_users();
-    foreach($users as $v){
-        $v->path=ADD_USER_URL;
-        $parser->parse(ADD_USER_DIR."/view/user-box.php",(array)$v->data, true);
+    $user = new user();
+    $pole = $user->get_pole();
+    $data['zg'] = "";
+    echo print_table_user($pole);
+    $parser->parse(ADD_USER_DIR . "/view/users.php", $data, true);
+    if(isset($_GET['page_user'])){
+        $users = get_users(array('offset'=>($_GET['page_user']-1)*5,'number'=>5));
     }
+    else{
+        $users = get_users(array('offset'=>0,'number'=>5));
+    }
+
+    foreach($users as $v){
+        $id_us = (array)$v->id;
+        $us = get_userdata($id_us['0']);
+        $us = (array)$us->data;
+        $user_meta_info = $user->get_all_user_meta($id_us['0']);
+        $result = array_merge($us, $user_meta_info);
+        $user_info = "";
+        echo prin_user_admin($result,$pole);
+    }
+    echo '</table>';
+
+    my_pagenavi();
+
 }
 
 function print_pole(){
@@ -302,3 +327,61 @@ $result = add_role( 'manager',
 );
 
 /*-------------------Конец добавления роли-----------------------------------------------------*/
+
+
+function print_result_search(){
+    $parser = new Parser_add_user();
+    $user = new user();
+    $result = $user->get_search_id_user($_POST);
+    $parser->parse(ADD_USER_DIR . "/view/result_searh.php", array(), true);
+    if(empty($result)){echo 'поиск не дал результатов';}
+    else{
+        $pole = $user->get_pole();
+        $data['zg'] = "";
+        echo print_table_user($pole);
+
+        foreach($result as $v){
+            $id_us = $v;
+            $us = get_userdata($id_us);
+            $us = (array)$us->data;
+            $user_meta_info = $user->get_all_user_meta($id_us);
+            $res = array_merge($us, $user_meta_info);
+            echo prin_user_admin($res,$pole);
+        }
+        echo '</table>';
+    }
+}
+
+
+function my_pagenavi() {
+    $parser = new Parser_add_user();
+    $user = new user();
+    global $wp_query;
+    $big = 999999999; // уникальное число для замены
+   // $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+    $args = array(
+        'base'=>'/wp-admin/admin.php?page=add_user%_%',
+        'format'       => '&page_user=%#%',
+        'total'        => $user->max_num_pages(),
+        'show_all'     => False,
+        'current'=>(isset($_GET['page_user'])) ? $_GET['page_user'] : 1,
+        'end_size'     => 1,
+        'mid_size'     => 2,
+        'prev_next'    => True,
+        'prev_text'    => __('« Назад'),
+        'next_text'    => __('Далее »'),
+        'type'         => 'plain',
+        'add_args'     => False,
+        'add_fragment' => '',
+        'before_page_number' => '',
+        'after_page_number' => ''
+
+    );
+
+    $result = paginate_links( $args );
+
+    // удаляем добавку к пагинации для первой страницы
+    //$result = str_replace( '/page/1/', '', $result );
+
+    echo $result;
+}

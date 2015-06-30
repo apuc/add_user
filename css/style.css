@@ -31,3 +31,12 @@ p.login-username label, p.login-password label{
     border: 1px solid #ccc;
     box-shadow: 0px 0px 5px #ccc;
 }
+
+table{
+    border-collapse: collapse
+}
+
+td{
+    text-align:center;
+    border-bottom:1px solid #fff;
+}
