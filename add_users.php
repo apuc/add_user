@@ -3,7 +3,7 @@
 Plugin Name: Online Add Users by Art Craft
 Plugin URI: http://web-artcraft.com
 Description: Плагин
-Version: 1.0.0
+Version: 1.0.1
 Author: ArtCraft
 Author URI: http://web-artcraft.com
  */
@@ -18,6 +18,9 @@ define('ADD_USER_URL', plugin_dir_url(__FILE__));
 require_once(ADD_USER_DIR."/lib/parser_add_user.php");
 require_once(ADD_USER_DIR."/lib/user.php");
 require_once(ADD_USER_DIR."functions.php");
+require_once(ADD_USER_DIR."/lib/PHPExcel.php");
+
+
 
 function add_user_style(){
     wp_enqueue_style( 'main-style', ADD_USER_URL . 'css/style.css', array(), '1');
@@ -134,6 +137,9 @@ function add_user_admin_page(){
             $user->del_pole($_GET['id']);
             print_pole();
         }
+        if ($_GET['action']=='export'){
+            get_excel();
+        }
 
     }
     else{
@@ -165,6 +171,8 @@ function add_user_admin_page(){
         }
 
         echo print_main();
+
+
     }
 
 }
@@ -172,8 +180,16 @@ function add_user_admin_page(){
 function print_main(){
     $parser = new Parser_add_user();
     $user = new user();
+    $admin_id = get_current_user_id();
+    $user_info = get_userdata( $admin_id );
+    $role = $user_info->roles[0];
+
+    if ($role=='manager'){$export = "";}
+    if ($role=='administrator'){$export = $parser->parse(ADD_USER_DIR."/view/export_admin.php",array(), false);}
+
     $pole = $user->get_pole();
     $data['zg'] = "";
+    $data['export'] = $export;
     echo print_table_user($pole);
     $parser->parse(ADD_USER_DIR . "/view/users.php", $data, true);
     if(isset($_GET['page_user'])){
@@ -384,4 +400,90 @@ function my_pagenavi() {
     //$result = str_replace( '/page/1/', '', $result );
 
     echo $result;
+}
+
+
+
+function get_excel(){
+   // prn('1');
+    $parser = new Parser_add_user();
+    $user = new user();
+    $pole = $user->see_pole();
+    $users = get_users();
+
+
+
+
+
+
+
+
+
+// Создаем объект класса PHPExcel
+    $xls = new PHPExcel();
+// Устанавливаем индекс активного листа
+    $xls->setActiveSheetIndex(0);
+// Получаем активный лист
+    $sheet = $xls->getActiveSheet();
+// Подписываем лист
+    $sheet->setTitle('Экспорт данных');
+
+
+// Выравнивание текста
+    $sheet->getStyle('A1')->getAlignment()->setHorizontal(
+        PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+    $sheet->getColumnDimension('B')->setAutoSize(true);
+    $sheet->getColumnDimension('C')->setAutoSize(true);
+    $sheet->getColumnDimension('D')->setAutoSize(true);
+    $sheet->getColumnDimension('F')->setAutoSize(true);
+    $sheet->getColumnDimension('G')->setAutoSize(true);
+    $sheet->getColumnDimension('H')->setAutoSize(true);
+    $sheet->getColumnDimension('I')->setAutoSize(true);
+    $sheet->getColumnDimension('J')->setAutoSize(true);
+    $sheet->getColumnDimension('K')->setAutoSize(true);
+    $sheet->getColumnDimension('L')->setAutoSize(true);
+    $sheet->getColumnDimension('M')->setAutoSize(true);
+    $sheet->getColumnDimension('N')->setAutoSize(true);
+    //$PHPExcel_Style->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $i = 1;
+    foreach($pole as $v){
+        if( $v->key != 'user_pass') {
+            $sheet->setCellValueByColumnAndRow($i, 1, $v->label);
+            $sheet->getStyleByColumnAndRow($i, 1)->getAlignment()->
+            setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $i++;
+        }
+    }
+
+    $j =2;
+    foreach($users as $v){
+        $id_us = (array)$v->id;
+        $us = get_userdata($id_us['0']);
+        $us = (array)$us->data;
+        $user_meta_info = $user->get_all_user_meta($id_us['0']);
+        $result = array_merge($us, $user_meta_info);
+        $i = 1;
+        $sheet->setCellValueByColumnAndRow(0,$j,$j-1);
+        foreach($pole as $f){
+            if( $f->key != 'user_pass'){
+                $sheet->setCellValueByColumnAndRow($i,$j,$result[$f->key]);
+                $sheet->getStyleByColumnAndRow($i, $j)->getAlignment()->
+                setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+                $i++;
+            }
+        }
+
+        $j++;
+
+    }
+
+// Выводим содержимое файла
+    $objWriter = new PHPExcel_Writer_Excel5($xls);
+    $objWriter->save(ADD_USER_DIR.'export.xls');
+    echo "<div><a href = '".ADD_USER_URL."export.xls'>Скачать файл</a></div>
+    <div><a href = \"/wp-admin/admin.php?page=add_user\">Назад</a></div>
+    ";
 }
