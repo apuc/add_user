@@ -193,10 +193,10 @@ function print_main(){
     echo print_table_user($pole);
     $parser->parse(ADD_USER_DIR . "/view/users.php", $data, true);
     if(isset($_GET['page_user'])){
-        $users = get_users(array('offset'=>($_GET['page_user']-1)*5,'number'=>5));
+        $users = get_users(array('offset'=>($_GET['page_user']-1)*10,'number'=>5));
     }
     else{
-        $users = get_users(array('offset'=>0,'number'=>5));
+        $users = get_users(array('offset'=>0,'number'=>10));
     }
 
     foreach($users as $v){

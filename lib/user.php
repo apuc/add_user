@@ -152,7 +152,7 @@ class user {
         foreach($result as $v){
             $k++;
         }
-        $k = ceil($k/5);
+        $k = ceil($k/10);
         return $k;
     }
 }
