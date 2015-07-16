@@ -1,6 +1,7 @@
 <h1>Пользователи</h1>
 
 {export}
+{import}
 
 <a class = "btn add" href="/wp-admin/admin.php?page=add_user&action=add_form">Добавить пользователя</a>
 <a class = "btn add" href="/wp-admin/admin.php?page=add_user&action=add_pole">Добавить поле</a>

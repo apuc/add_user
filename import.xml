@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<debts>
+    <line agreement="1111" date="20150630" sum="1.00"></line>
+    <line agreement="555" date="20150630" sum="200.00"></line>
+    <line agreement="33" date="20150630" sum="500.00"></line>
+</debts>

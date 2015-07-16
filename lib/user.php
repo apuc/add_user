@@ -155,4 +155,24 @@ class user {
         $k = ceil($k/10);
         return $k;
     }
+
+
+    function get_atributes_xml($xml){
+        $i=0;
+        foreach ($xml->line as $row) {
+            foreach ($row->attributes() as $key => $v) {
+                $v = (array)$v;
+                $arr[$i][$key]=$v[0];
+            }
+            $i++;
+        }
+        return $arr;
+    }
+
+    function get_overlap($k){
+        global $wpdb;
+        $result = $wpdb->get_results("SELECT * FROM wp_usermeta WHERE meta_key LIKE 'nomdogovor' AND meta_value LIKE '".$k."'");
+        $id = $result[0]->user_id;
+        return $id;
+    }
 }
