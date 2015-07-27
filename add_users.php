@@ -150,11 +150,6 @@ function add_user_admin_page()
             get_excel();
         }
         if ($_GET['action'] == 'import') {
-           /*/* $homepage = file_get_contents(ADD_USER_DIR . 'import.xml');
-            $count = get_xml($homepage);
-            echo "Было изменено " . $count . " пользователей";*/
-          /*  echo print_main();*/
-
             $res = $user->get_import_statics();
             foreach($res as $v){
                 $stat['stat'] .= $parser->parse(ADD_USER_DIR . "/view/import_stat_view.php", array('date'=>date('Y-m-d',$v->dt_add),'kol'=>$v->ub_user), false);
@@ -239,7 +234,7 @@ function print_main()
         $user_meta_info = $user->get_all_user_meta($id_us['0']);
         $result = array_merge($us, $user_meta_info);
         $user_info = "";
-        echo prin_user_admin($result, $pole);
+        echo prin_user_admin($result, $pole,$role);
     }
     echo '</table>';
 

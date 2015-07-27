@@ -1,5 +1,16 @@
 <?php
-function prin_user_admin($user_info, $pole){
+function prin_user_admin($user_info, $pole,$admin_role){
+    if($admin_role == 'manager'){
+
+        $html = '
+        <tr>
+            <td width="10%">
+                <a href="/wp-admin/admin.php?page=add_user&action=edit&id='.$user_info['ID'].'"><img src="'.ADD_USER_URL.'images/edit.png" alt=""/></a>
+                <a href = "/wp-admin/admin.php?page=add_user&action=see&id='.$user_info['ID'].'"><img src="'.ADD_USER_URL.'images/see.png" alt=""/></a>
+            </td>
+            ';
+    }
+    else{
     $html = '
         <tr>
             <td width="10%">
@@ -8,6 +19,7 @@ function prin_user_admin($user_info, $pole){
                 <a href = "/wp-admin/admin.php?page=add_user&action=see&id='.$user_info['ID'].'"><img src="'.ADD_USER_URL.'images/see.png" alt=""/></a>
             </td>
             ';
+    }
 foreach ($pole as $v){
     $html .= '<td>'.$user_info[$v->key].'</td>';
 }
