@@ -150,7 +150,16 @@ function add_user_admin_page()
             get_excel();
         }
         if ($_GET['action'] == 'import') {
-            $parser->parse(ADD_USER_DIR . "/view/import_view.php", array(), true);
+           /*/* $homepage = file_get_contents(ADD_USER_DIR . 'import.xml');
+            $count = get_xml($homepage);
+            echo "Было изменено " . $count . " пользователей";*/
+          /*  echo print_main();*/
+
+            $res = $user->get_import_statics();
+            foreach($res as $v){
+                $stat['stat'] .= $parser->parse(ADD_USER_DIR . "/view/import_stat_view.php", array('date'=>date('Y-m-d',$v->dt_add),'kol'=>$v->ub_user), false);
+            }
+            $parser->parse(ADD_USER_DIR . "/view/import_view.php",$stat, true);
         }
 
     } else {
@@ -175,7 +184,7 @@ function add_user_admin_page()
             print_result_search();
             exit;
         }
-        if (isset($_POST['import'])) {
+      /*  if (isset($_POST['import'])) {
             if ($_FILES['uploadfile']['type'] == 'text/xml') {
                 $uploadfile = ADD_USER_DIR . 'import.xml';
                 if (copy($_FILES['uploadfile']['tmp_name'], $uploadfile)) {
@@ -190,7 +199,7 @@ function add_user_admin_page()
             } else {
                 echo "<h3>Выберите файл в формате XML</h3>";
             }
-        }
+        }*/
         echo print_main();
     }
 
@@ -218,7 +227,7 @@ function print_main()
     echo print_table_user($pole);
     $parser->parse(ADD_USER_DIR . "/view/users.php", $data, true);
     if (isset($_GET['page_user'])) {
-        $users = get_users(array('offset' => ($_GET['page_user'] - 1) * 10, 'number' => 5));
+        $users = get_users(array('offset' => ($_GET['page_user'] - 1) * 10, 'number' => 10));
     } else {
         $users = get_users(array('offset' => 0, 'number' => 10));
     }

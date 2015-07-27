@@ -172,7 +172,20 @@ class user {
     function get_overlap($k){
         global $wpdb;
         $result = $wpdb->get_results("SELECT * FROM wp_usermeta WHERE meta_key LIKE 'nomdogovor' AND meta_value LIKE '".$k."'");
-        $id = $result[0]->user_id;
-        return $id;
+        if (empty($result)){
+            return FALSE;
+        }
+        else{
+            $id = $result[0]->user_id;
+            return $id;
+        }
+
+    }
+
+
+    function get_import_statics(){
+        global $wpdb;
+        $res = $wpdb->get_results("SELECT * FROM ubdate_user");
+        return $res;
     }
 }
