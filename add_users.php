@@ -29,9 +29,20 @@ function add_user_style()
 function add_user_script()
 {
     wp_enqueue_script('jquery-chat', 'http://code.jquery.com/jquery-1.9.1.min.js', array(), '1');
-    wp_enqueue_script('chat_script', ADD_USER_URL . 'js/script.js', array(), '1');
-    wp_localize_script('chat_script', 'myajax', array('url' => admin_url('admin-ajax.php')));
+    wp_enqueue_script('mail_script', ADD_USER_URL . 'js/script.js', array(), '1');
+    wp_enqueue_script('masege', ADD_USER_URL . '/js/script_mail.js', array(), '1');
+    wp_localize_script( 'jquery', 'myajax',
+        array(
+            'url' => admin_url('admin-ajax.php')
+        ));
 }
+
+add_action('wp_ajax_mail', 'get_mail_function');
+add_action('wp_ajax_nopriv_mail', 'get_mail_function');
+
+add_action('wp_ajax_massage', 'get_massage_function');
+add_action('wp_ajax_nopriv_massage', 'get_massage_function');
+
 
 function true_add_user_backend()
 {
@@ -76,7 +87,6 @@ add_action('admin_init', 'add_theme_caps');
 
 function add_user_admin_page()
 {
-
     $parser = new Parser_add_user();
     $user = new user();
     $admin_id = get_current_user_id();
@@ -307,7 +317,6 @@ function user_pages()
     if ($user_id == '0') {
         wp_login_form();
     } else {
-
         $parser = new Parser_add_user();
         $user = new user();
         $info = get_userdata($user_id);
@@ -324,18 +333,13 @@ function user_pages()
             }
         }
         $edit['fields'] = $fields;
-
         global $user;
-        //  prn($k = current_user_can('manager'));
-
         if (current_user_can('manager')) {
             $edit['url'] = home_url('/wp-admin/');
             $parser->parse(ADD_USER_DIR . "/view/site/user_manager.php", $edit, fulse);
         } else {
             $parser->parse(ADD_USER_DIR . "/view/site/user_pages.php", $edit, true);
         }
-
-
     }
 }
 
@@ -362,8 +366,6 @@ $result = add_role('manager',
         'update_plugin' => false, // User can’t update any plugins
         'update_core' => false, // user cant perform core updates
         'add_user' => true // user cant perform core updates
-
-
     )
 
 );
@@ -528,5 +530,33 @@ function get_xml($xmlstr)
         }
     }
     return $i;
+
+}
+
+function get_mail_function(){
+    $user_id = get_current_user_id();
+    $user = new user();
+    $info = get_userdata($user_id);
+    $info = (array)$info->data;
+    $info2 = $user->get_all_user_meta($user_id);
+    $result = array_merge($info, $info2);
+    $email = $result['user_email'];
+    $name = $result['first_name'];
+    mail('shkkireal@gmail.com', 'Заказ счета', "пользователь $name запросил счет на email - $email");
+    die();
+}
+
+function get_massage_function(){
+    $user_id = get_current_user_id();
+    $user = new user();
+    $info = get_userdata($user_id);
+    $info = (array)$info->data;
+    $info2 = $user->get_all_user_meta($user_id);
+    $result = array_merge($info, $info2);
+    $email = $result['user_email'];
+    $name = $result['first_name'];
+    $text = $_POST['text'];
+    mail('shkkireal@gmail.com', 'Сообщение с вашего сайта', "пользователь $name c email-ом - $email написал Вам сообщение: $text");
+    die();
 
 }
